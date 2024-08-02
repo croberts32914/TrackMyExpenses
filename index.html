@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BB Expense Tracker</title>
+    <link href="/static/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="header">
+        <h1>B.B. Expense Tracker</h1>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    </div>
+
+    <main>
+        <div class="container">
+            <!-- Starting Balance Form -->
+            <form method="post" action="/">
+                <label for="starting_balance">Starting Balance:</label>
+                <input type="number" step="0.01" name="starting_balance" id="starting_balance" value="{{ starting_balance if starting_balance is not none else '' }}"><br><br>
+                <input type="submit" name="set_balance" value="Set Balance">
+            </form>
+            <br><br>
+
+            <!-- Expense Entry Form -->
+            <form method="post" action="/">
+                <label for="amount">Amount:</label>
+                <input type="number" step="0.01" name="amount" id="amount" required><br>
+                <label for="expense">Expense:</label>
+                <select name="expense" id="expense" required>
+                    <option value="Apple">Apple</option>
+                    <option value="Charity/Donations">Charity/Donations</option>
+                    <option value="Childcare">Childcare</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Credit Card - American Express">Credit Card - American Express</option>
+                    <option value="Credit Card - Discover">Credit Card - Discover</option>
+                    <option value="Credit Card - MasterCard">Credit Card - MasterCard</option>
+                    <option value="Credit Card - Visa">Credit Card - Visa</option>
+                    <option value="Dining Out">Dining Out</option>
+                    <option value="Education">Education</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Food & Groceries">Food & Groceries</option>
+                    <option value="Gifts">Gifts</option>
+                    <option value="Health">Health</option>
+                    <option value="Home Maintenance">Home Maintenance</option>
+                    <option value="Insurance - Auto">Insurance - Auto</option>
+                    <option value="Insurance - Health">Insurance - Health</option>
+                    <option value="Insurance - Home">Insurance - Home</option>
+                    <option value="Insurance - Life">Insurance - Life</option>
+                    <option value="Internet">Internet</option>
+                    <option value="Investments/Savings">Investments/Savings</option>
+                    <option value="Loan Payment - Auto">Loan Payment - Auto</option>
+                    <option value="Loan Payment - Personal">Loan Payment - Personal</option>
+                    <option value="Loan Payment - Student">Loan Payment - Student</option>
+                    <option value="Memberships/Subscriptions">Memberships/Subscriptions</option>
+                    <option value="Miscellaneous">Miscellaneous</option>
+                    <option value="Personal Care">Personal Care</option>
+                    <option value="Pet Care">Pet Care</option>
+                    <option value="Rent/Mortgage">Rent/Mortgage</option>
+                    <option value="Shopping">Shopping</option>
+                    <option value="Taxes">Taxes</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Utilities">Utilities</option>
+                    <option value="Water">Water</option>
+                </select><br>
+                <label for="date">Date:</label>
+                <input type="date" name="date" id="date" required>
+                <input type="submit" value="Add">
+            </form>
+            <br><br><br>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Paid</th>
+                        <th>Date</th>
+                        <th>Expense</th>
+                        <th>Amount</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr data-id="{{ loop.index0 }}">
+                        <td><input type="checkbox" class="paid-checkbox" {{ 'checked' if expense.paid else '' }}></td>
+                        <td>
+                            {% if expense.date %}
+                                {{ expense.date.strftime('%m-%d-%Y') }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ expense.category if expense.category else 'N/A' }}
+                        </td>
+                        <td>
+                            {{ expense.amount if expense.amount else 'N/A' }}
+                        </td>
+                        <td><button class="delete-button">Delete</button></td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="3">Total Expenses</td>
+                        <td id="total-amount">{{ total_expenses if total_expenses is not none else '0.00' }}</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">Remaining Balance</td>
+                        <td id="remaining-balance">{{ remaining_balance if remaining_balance is not none else '0.00' }}</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".delete-button").forEach(function(button) {
+                button.addEventListener("click", function(event) {
+                    const row = event.target.closest('tr');
+                    const expenseId = row.getAttribute('data-id');
+                    
+                    if (confirm('Are you sure you want to delete this expense?')) {
+                        fetch(`/api/delete_expense/${expenseId}`, {
+                            method: 'DELETE'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message) {
+                                row.remove();
+                                document.getElementById('total-amount').innerText = data.total_expenses.toFixed(2);
+                                document.getElementById('remaining-balance').innerText = data.remaining_balance.toFixed(2);
+                            } else {
+                                alert('Failed to delete expense.');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
