@@ -1,99 +1,141 @@
 /* General styles for the entire table */
 table {
-    width: 100%; /* Full width */
-    border-collapse: collapse; /* Collapse borders into a single border */
-    background-color: wheat; /* Background color of the table */
+    width: 70%;
+    /* Width of the table */
+    margin: 0 auto;
+    /* Center the table horizontally */
+    border-collapse: collapse;
+    /* Collapse borders into a single border */
+    background-color: rgb(115, 115, 168);
+    /* Background color of the table */
 }
 
 /* Header row styling */
 thead {
-    background-color: #fec7c7; /* Light pink background for header */
+    background-color: rgb(20, 42, 106);
+    /* Background for header */
 }
 
 /* Header cells */
 th {
-    padding: 15px; /* Padding inside header cells */
-    text-align: center; /* Center-align text */
-    border: 2px solid black; /* Black border for header cells */
+    padding: 10px;
+    /* Reduced padding inside header cells */
+    text-align: center;
+    /* Center-align text */
+    border: 2px solid black;
+    /* Black border for header cells */
+    color: white;
 }
 
 /* Regular cells */
 td {
-    padding: 5px; /* Padding inside regular cells */
-    text-align: left; /* Left-align text */
-    border: 1px solid black; /* Black border for regular cells */
-    color: black; /* Text color */
+    padding: 5px;
+    /* Padding inside regular cells */
+    text-align: left;
+    /* Left-align text */
+    border: 1px solid black;
+    /* Black border for regular cells */
+    color: white;
+    /* Text color */
 }
 
 /* Zebra-striping for rows */
 tr:nth-child(even) {
-    background-color: #FF7F50; /* Light coral background for even rows */
+    background-color: rgb(60, 60, 84);
+    /* Light coral background for even rows */
 }
 
 /* Hover effect for rows */
 tr:hover {
-    background-color: burlywood; /* Background color when hovering over rows */
+    background-color: rgb(126, 123, 121);
+    /* Background color when hovering over rows */
 }
 
 /* Wrapper for amount and category sections */
 .amount-category-wrapper {
-    border: 1px solid white; /* White border */
-    padding: 10px; /* Padding inside the wrapper */
+    border: 1px solid white;
+    /* White border */
+    padding: 10px;
+    /* Padding inside the wrapper */
 }
 
-/* Delete button styling */
 #delete-button {
-    background-color: blue; /* Blue background for delete button */
-    color: white; /* White text color */
-    border: none; /* No border */
-    padding: 10px 20px; /* Padding inside the button */
-    cursor: pointer; /* Pointer cursor on hover */
+    background-color: blue;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
 }
 
 /* Body styling */
 body {
-    margin: 0; /* Remove default margin */
-    padding: 0; /* Remove default padding */
-    font-family: Arial, sans-serif; /* Font family */
-    background-color: #FFD700 !important; /* Background color with high specificity */
-    background-image: none !important; /* Ensure no background image is used */
-    background-size: cover; /* Cover the entire area */
-    background-attachment: fixed; /* Keep background fixed during scroll */
-    background-position: center; /* Center the background color */
-    box-sizing: border-box; /* Include padding and border in element's total width and height */
+    margin: 20;
+    /* Remove default margin */
+    padding: 0;
+    /* Remove default padding */
+    font-family: Arial, sans-serif;
+    /* Font family */
 }
 
-/* Hover effect for logout button */
-.logout-btn:hover {
-    background-color: rgb(239, 74, 74); /* Change color on hover */
+/* Apply background image to the entire body */
+body {
+    background-image: url('/static/grey.jpeg') !important;
+    background-size: cover;
+    /* Ensure the image covers the entire element */
+    background-position: center;
+    /* Center the image */
 }
 
 /* Header styling */
 .header {
-    position: relative; /* Relative positioning */
-    padding: 20px; /* Padding inside header */
-    text-align: center; /* Center-align text */
-    background: black; /* Black background */
-    color: white; /* White text color */
-    font-size: 30px; /* Font size */
+    display: flex;
+    /* Use Flexbox for layout */
+    align-items: center;
+    /* Center items vertically */
+    justify-content: space-between;
+    /* Space between header text and logout button */
+    padding: 5px 20px;
+    /* Padding inside header */
+    background: black;
+    /* Black background */
+    color: white;
+    /* White text color */
+    font-size: 16px;
+    /* Font size */
+    line-height: 1.2;
+    /* Adjust line height */
+    position: fixed;
+    /* Fixed positioning */
+    top: 0;
+    /* Align to the top */
+    left: 0;
+    /* Align to the left */
+    width: 100%;
+    /* Full width */
+    z-index: 1000;
+    /* Ensure it's on top of other content */
+    height: 60px;
+    /* Define header height */
 }
 
 /* Logout button styling */
 .logout-btn {
-    background-color: red; /* Red background for logout button */
-    color: black; /* Black text color */
-    border: 1px solid black; /* Black border */
-    padding: 10px 20px; /* Padding inside button */
-    text-decoration: none; /* No underline on text */
-    border-radius: 5px; /* Rounded corners */
-    font-weight: bold; /* Bold text */
-    cursor: pointer; /* Pointer cursor on hover */
-    float: right; /* Align to the right */
-    margin-top: -30px; /* Adjust to vertically align with header content */
-    margin-right: 7px; /* Margin to the right */
-}
-
-/* Page content styling */
-.content {
-    padding: 0px; /* Padding inside content area */
+    background-color: darkgray;
+    /* Dark gray background for logout button */
+    color: black;
+    /* Black text color */
+    border: 2px solid black;
+    /* Black border */
+    padding: 5px 10px;
+    /* Padding inside button */
+    text-decoration: none;
+    /* No underline on text */
+    border-radius: 5px;
+    /* Rounded corners */
+    font-weight: bold;
+    /* Bold text */
+    cursor: pointer;
+    /* Pointer cursor on hover */
+    margin-right: 50px;
+    /* Adjust margin-right to move the button left */
 }
