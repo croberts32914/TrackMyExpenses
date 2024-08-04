@@ -5,34 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BB Expense Tracker</title>
     <link href="/static/styles.css" rel="stylesheet">
+    <style>
+        /* Add any custom styles you need here */
+    </style>
 </head>
 <body>
     <div class="header">
         <h1>B.B. Expense Tracker</h1>
         <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
     </div>
-
+    <br><br><br><br><br>
     <main>
         <div class="container">
             <!-- Starting Balance Form -->
-            <form method="post" action="/">
+            <form id="balance-form" method="post" action="/">
                 <label for="starting_balance">Starting Balance:</label>
-                <input type="number" step="0.01" name="starting_balance" id="starting_balance" value="{{ starting_balance if starting_balance is not none else '' }}"><br><br>
+                <input type="number" step="0.01" name="starting_balance" id="starting_balance" 
+                value="{{ starting_balance if starting_balance is not none else '' }}" required><br><br>
                 <input type="submit" name="set_balance" value="Set Balance">
             </form>
             <br><br>
 
             <!-- Expense Entry Form -->
-            <form method="post" action="/">
+            <form id="expense-form" method="post" action="/" onsubmit="return validateExpenseForm()">
                 <label for="amount">Amount:</label>
                 <input type="number" step="0.01" name="amount" id="amount" required><br>
+
                 <label for="expense">Expense:</label>
                 <select name="expense" id="expense" required>
-                    <option value="Apple">Apple</option>
+                    <!-- Dropdown options for different expense categories -->
+                    <option value="" disabled selected>Select an expense</option>
                     <option value="Charity/Donations">Charity/Donations</option>
                     <option value="Childcare">Childcare</option>
                     <option value="Clothing">Clothing</option>
                     <option value="Credit Card - American Express">Credit Card - American Express</option>
+                    <option value="Credit Card - Apple">Credit Card - Apple</option>
                     <option value="Credit Card - Discover">Credit Card - Discover</option>
                     <option value="Credit Card - MasterCard">Credit Card - MasterCard</option>
                     <option value="Credit Card - Visa">Credit Card - Visa</option>
@@ -64,11 +71,17 @@
                     <option value="Utilities">Utilities</option>
                     <option value="Water">Water</option>
                 </select><br>
+
                 <label for="date">Date:</label>
-                <input type="date" name="date" id="date" required>
+                <input type="date" name="date" id="date" required><br>
+
+                <!-- Hidden fields for handling updates -->
+                <input type="hidden" name="updating" id="updating" value="false">
+                <input type="hidden" name="expense_id" id="expense_id">
+
                 <input type="submit" value="Add">
             </form>
-            <br><br><br>
+            <br><br>
 
             <table>
                 <thead>
@@ -81,30 +94,29 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Loop through expenses and display each row -->
                     {% for expense in expenses %}
                     <tr data-id="{{ loop.index0 }}">
-                        <td><input type="checkbox" class="paid-checkbox" {{ 'checked' if expense.paid else '' }}></td>
                         <td>
-                            {% if expense.date %}
-                                {{ expense.date.strftime('%m-%d-%Y') }}
-                            {% else %}
-                                N/A
-                            {% endif %}
+                            <!-- Checkbox to mark the expense as paid -->
+                            <input type="checkbox" class="paid-checkbox" {{ 'checked' if expense.paid else '' }}>
                         </td>
+                        <td>{{ expense.date if expense.date else 'N/A' }}</td>
+                        <td>{{ expense.category if expense.category else 'N/A' }}</td>
+                        <td>{{ expense.amount if expense.amount else 'N/A' }}</td>
                         <td>
-                            {{ expense.category if expense.category else 'N/A' }}
+                            <!-- Button to delete the expense -->
+                            <button class="delete-button">Delete</button>
                         </td>
-                        <td>
-                            {{ expense.amount if expense.amount else 'N/A' }}
-                        </td>
-                        <td><button class="delete-button">Delete</button></td>
                     </tr>
                     {% endfor %}
+                    <!-- Total Expenses Row -->
                     <tr>
                         <td colspan="3">Total Expenses</td>
                         <td id="total-amount">{{ total_expenses if total_expenses is not none else '0.00' }}</td>
                         <td></td>
                     </tr>
+                    <!-- Remaining Balance Row -->
                     <tr>
                         <td colspan="3">Remaining Balance</td>
                         <td id="remaining-balance">{{ remaining_balance if remaining_balance is not none else '0.00' }}</td>
@@ -117,29 +129,61 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // Add event listeners to all delete buttons
             document.querySelectorAll(".delete-button").forEach(function(button) {
                 button.addEventListener("click", function(event) {
-                    const row = event.target.closest('tr');
-                    const expenseId = row.getAttribute('data-id');
-                    
+                    const row = event.target.closest('tr'); // Get the closest table row
+                    const expenseId = row.getAttribute('data-id'); // Get the expense ID from the data attribute
+
+                    // Confirm with the user before deleting
                     if (confirm('Are you sure you want to delete this expense?')) {
-                        fetch(`/api/delete_expense/${expenseId}`, {
-                            method: 'DELETE'
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.message) {
-                                row.remove();
-                                document.getElementById('total-amount').innerText = data.total_expenses.toFixed(2);
-                                document.getElementById('remaining-balance').innerText = data.remaining_balance.toFixed(2);
-                            } else {
-                                alert('Failed to delete expense.');
-                            }
-                        });
+                        fetch(`/api/delete_expense/${expenseId}`, { method: 'DELETE' })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.message) {
+                                    row.remove(); // Remove the row from the table
+                                    // Update total expenses and remaining balance
+                                    document.getElementById('total-amount').innerText = data.total_expenses.toFixed(2);
+                                    document.getElementById('remaining-balance').innerText = data.remaining_balance.toFixed(2);
+                                } else {
+                                    console.error(data.error); // Log any errors
+                                }
+                            })
+                            .catch(error => {
+                                console.error('There was an error deleting the expense:', error);
+                            });
                     }
+                });
+            });
+
+            // Add event listeners to all paid checkboxes
+            document.querySelectorAll(".paid-checkbox").forEach(function(checkbox) {
+                checkbox.addEventListener("change", function(event) {
+                    const row = event.target.closest('tr'); // Get the closest table row
+                    const expenseId = row.getAttribute('data-id'); // Get the expense ID from the data attribute
+                    const isPaid = checkbox.checked; // Get the checked status of the checkbox
+
+                    // Send update request to the server
+                    fetch(`/api/update_expense/${expenseId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ paid: isPaid }) // Send the updated paid status
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            console.error(data.error); // Log any errors
+                        }
+                    })
+                    .catch(error => {
+                        console.error('There was an error updating the expense:', error);
+                    });
                 });
             });
         });
     </script>
+
 </body>
 </html>
